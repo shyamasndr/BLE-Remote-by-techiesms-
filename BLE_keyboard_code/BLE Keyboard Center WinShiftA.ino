@@ -19,8 +19,9 @@ const long interval = 120000;  // interval in milliseconds (2 minute)
 
 RTC_DATA_ATTR int bootCount = 0;
 // BLEMOUSE gloal declaration
-BleKeyboard bleKeyboard("ESP32 BLE Keyboard", "SeedStudio", 100);
-
+BleKeyboard bleKeyboard("ShyamsKeyboard", "ShyamsLab", 100);
+int ledVoltageHigh = 6;
+int ledVoltageLow = 0;
 bool status = true;
 void setup() {
   Serial.begin(115200);
@@ -46,13 +47,13 @@ void setup() {
 }
 // when bluetooth is not connected
 void not_connected() {
-  digitalWrite(R, HIGH);
+  analogWrite(R, ledVoltageHigh);
   delay(500);
-  digitalWrite(R, LOW);
+  analogWrite(R, ledVoltageLow);
   delay(500);
 
-  digitalWrite(G, LOW);
-  digitalWrite(B, LOW);
+  analogWrite(G, ledVoltageLow);
+  analogWrite(B, ledVoltageLow);
   status = true;
 }
 void print_wakeup_reason() {
@@ -63,7 +64,6 @@ void print_wakeup_reason() {
   switch (wakeup_reason) {
     case ESP_SLEEP_WAKEUP_EXT0:
       Serial.println("Wakeup caused by external signal using RTC_IO");
-      blink_Blue();
       break;
     case ESP_SLEEP_WAKEUP_EXT1: Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
     case ESP_SLEEP_WAKEUP_TIMER: Serial.println("Wakeup caused by timer"); break;
@@ -75,7 +75,9 @@ void print_wakeup_reason() {
 
 // when bluetooth is connected and but is presses led
 void but_pressed() {
-  digitalWrite(B, HIGH);
+  analogWrite(B, ledVoltageHigh);
+  delay(750);
+  analogWrite(B, ledVoltageLow);
 }
 
 void reset_timer() {
@@ -90,28 +92,24 @@ void keyboardconnected() {
     but_pressed();
     reset_timer();
     Serial.println("UP KEY PRESSED");
-    delay(750);
   }
   if (digitalRead(D_BUT) == 0) {
     bleKeyboard.write(KEY_DOWN_ARROW);
     but_pressed();
     reset_timer();
     Serial.println("DOWN KEY PRESSED");
-    delay(750);
   }
   if (digitalRead(L_BUT) == 0) {
     bleKeyboard.write(KEY_LEFT_ARROW);
     but_pressed();
     reset_timer();
     Serial.println("LEFT KEY PRESSED");
-    delay(750);
   }
   if (digitalRead(R_BUT) == 0) {
     bleKeyboard.write(KEY_RIGHT_ARROW);
     but_pressed();
     reset_timer();
     Serial.println("RIGHT KEY PRESSED");
-    delay(750);
   }
   if (digitalRead(C_BUT) == 0) {
     bleKeyboard.press(KEY_LEFT_GUI);
@@ -122,9 +120,7 @@ void keyboardconnected() {
     but_pressed();
     reset_timer();
     Serial.println("Sending Win+Shift+A");
-    delay(750);
   } else {
-    digitalWrite(B, LOW);
     gotodeepsleep();
   }
 }
@@ -133,9 +129,6 @@ void gotodeepsleep() {
 
   // check if it's time to print
   if (latestMils - previousMillis >= interval) {
-    Serial.println("More than two minute has passed!");
-    Serial.println("Going to sleep now");
-    // Your code to print to serial goes here
     Serial.println("No button is pressed for more than minute. Going to sleep");
     blink_Red();
     esp_deep_sleep_start();
@@ -144,49 +137,50 @@ void gotodeepsleep() {
 
 void blink_Red() {
 
-  digitalWrite(R, HIGH);
+  analogWrite(R, ledVoltageHigh);
   delay(1000);
-  digitalWrite(R, LOW);
+  analogWrite(R, ledVoltageLow);
   delay(1000);
-  digitalWrite(R, HIGH);
+  analogWrite(R, ledVoltageHigh);
   delay(1000);
-  digitalWrite(R, LOW);
+  analogWrite(R, ledVoltageLow);
   delay(1000);
-  digitalWrite(R, HIGH);
+  analogWrite(R, ledVoltageHigh);
   delay(1000);
-  digitalWrite(R, LOW);
+  analogWrite(R, ledVoltageLow);
   delay(1000);
-  digitalWrite(R, HIGH);
+  analogWrite(R, ledVoltageHigh);
   delay(1000);
-  digitalWrite(R, LOW);
+  analogWrite(R, ledVoltageLow);
 }
 void blink_Blue() {
 
-  digitalWrite(B, HIGH);
+  analogWrite(B, ledVoltageHigh);
   delay(1000);
-  digitalWrite(B, LOW);
+  analogWrite(B, ledVoltageLow);
   delay(1000);
-  digitalWrite(B, HIGH);
+  analogWrite(B, ledVoltageHigh);
   delay(1000);
-  digitalWrite(B, LOW);
+  analogWrite(B, ledVoltageLow);
   delay(1000);
-  digitalWrite(B, HIGH);
+  analogWrite(B, ledVoltageHigh);
   delay(1000);
-  digitalWrite(B, LOW);
+  analogWrite(B, ledVoltageLow);
   delay(1000);
-  digitalWrite(B, HIGH);
+  analogWrite(B, ledVoltageHigh);
   delay(1000);
-  digitalWrite(B, LOW);
+  analogWrite(B, ledVoltageLow);
+  delay(1000);
 }
 
 void loop() {
   if (bleKeyboard.isConnected()) {
     if (status == true) {
-      digitalWrite(G, HIGH);
+      analogWrite(G, ledVoltageHigh);
       delay(3000);
       status = false;
     }
-    digitalWrite(G, LOW);
+    analogWrite(G, ledVoltageLow);
     keyboardconnected();
   } else {
     not_connected();
